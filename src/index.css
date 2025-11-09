@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+/* Background bubbles styles */
+.bubbles-container {
+	position: absolute;
+	inset: 0; /* full-bleed */
+	pointer-events: none; /* allow clicks through */
+}
+
+.bubble {
+	position: absolute;
+	border-radius: 9999px;
+	will-change: transform, opacity;
+	mix-blend-mode: normal;
+	opacity: 0.95;
+	filter: blur(0.2px);
+}
+
+/* Subtle floating keyframes with X/Y offsets and scale */
+@keyframes bubbleFloat {
+	0% {
+		transform: translate3d(0, 0, 0) scale(1);
+		opacity: 0.95;
+	}
+	25% {
+		transform: translate3d(-10px, 8px, 0) scale(0.98);
+		opacity: 0.9;
+	}
+	50% {
+		transform: translate3d(6px, -10px, 0) scale(1.02);
+		opacity: 0.95;
+	}
+	75% {
+		transform: translate3d(-6px, 12px, 0) scale(0.99);
+		opacity: 0.92;
+	}
+	100% {
+		transform: translate3d(0, 0, 0) scale(1);
+		opacity: 0.95;
+	}
+}
+
+/* Different speeds and easing so animations feel organic */
+.animate-bubble-slow { animation: bubbleFloat 14s ease-in-out infinite; }
+.animate-bubble-med  { animation: bubbleFloat 10s ease-in-out infinite; }
+.animate-bubble-fast { animation: bubbleFloat 7.5s ease-in-out infinite; }
+
+/* helper to vary starting phase */
+.delay-0  { animation-delay: 0s; }
+.delay-1  { animation-delay: 2.3s; }
+.delay-2  { animation-delay: 4.5s; }
+.delay-3  { animation-delay: 6.1s; }
+.delay-4  { animation-delay: 3.7s; }
+
+/* Responsive scaling for very small screens */
+@media (max-width: 420px) {
+	.bubble { transform-origin: center; }
+}
+
+/* Temporary speed-up state when user presses play */
+.speedup .animate-bubble-slow  { animation-duration: 3s !important; }
+.speedup .animate-bubble-med   { animation-duration: 2s !important; }
+.speedup .animate-bubble-fast  { animation-duration: 1s !important; }
+.speedup .bubble {
+	/* make motion feel stronger */
+	filter: brightness(1.05) saturate(1.05);
+}
+
+/* Global class fallback to guarantee immediate sync when PlayButton toggles */
+.bubble-speedup-global .animate-bubble-slow  { animation-duration: 1.25s !important; }
+.bubble-speedup-global .animate-bubble-med   { animation-duration: 0.9s !important; }
+.bubble-speedup-global .animate-bubble-fast  { animation-duration: 0.6s !important; }
+.bubble-speedup-global .bubble { filter: brightness(1.08) saturate(1.08); }
+
+
+/* Play button styles */
+.play-wrapper {
+	position: absolute;
+	inset: 0; /* fill parent */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none; /* allow button to decide pointer-events */
+}
+
+.play-button {
+	--size: 180px;
+	pointer-events: auto;
+	width: var(--size);
+	height: var(--size);
+	border-radius: 9999px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #072126;
+	font-weight: 800;
+	font-size: 1.05rem;
+	letter-spacing: 0.6px;
+	cursor: pointer;
+	user-select: none;
+	border: none;
+	outline: none;
+	box-shadow: 0 12px 30px rgba(3,15,26,0.25), 0 6px 12px rgba(0,0,0,0.08) inset;
+	background: linear-gradient(135deg,#ff6be0,#ffb84d);
+	transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms ease, filter 220ms ease;
+	transform: translateY(0) scale(1);
+	position: relative;
+}
+
+.play-button:hover {
+	transform: translateY(-6px) scale(1.03);
+	box-shadow: 0 20px 40px rgba(3,15,26,0.34);
+}
+
+.play-button:active {
+	transform: translateY(0) scale(0.98);
+}
+
+/* subtle pulsing glow */
+@keyframes playPulse {
+	0% { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0)); }
+	50% { filter: drop-shadow(0 0 18px rgba(255,140,120,0.12)); }
+	100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0)); }
+}
+.play-button.glow {
+	animation: playPulse 3s ease-in-out infinite;
+}
+
+/* inner label style */
+.play-button .label {
+	padding: 8px 14px;
+	border-radius: 999px;
+	background: rgba(255,255,255,0.12);
+	backdrop-filter: blur(6px);
+}
+
+/* ripple */
+.ripple {
+	position: absolute;
+	border-radius: 999px;
+	transform: scale(0);
+	animation: rippleAnim 700ms ease-out forwards;
+	background: rgba(255,255,255,0.35);
+	pointer-events: none;
+}
+
+@keyframes rippleAnim {
+	to { transform: scale(3); opacity: 0; }
+}
+
+/* Responsive: smaller button on small screens */
+@media (max-width: 480px) {
+	.play-button { --size: 140px; font-size: 0.95rem; }
+}
+
+
