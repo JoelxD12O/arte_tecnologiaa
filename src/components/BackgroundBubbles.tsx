@@ -32,52 +32,103 @@ export default function BackgroundBubbles() {
   ]
 
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const speedupRafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
-    const handler = () => {
-      el.classList.add('speedup')
-      window.setTimeout(() => el.classList.remove('speedup'), 1600)
+    const bubbleEls = Array.from(el.querySelectorAll<HTMLElement>('.bubble'))
+    const anims: Animation[] = []
 
-      const bubbleEls = Array.from(el.querySelectorAll<HTMLElement>('.bubble'))
-      const allAnims = bubbleEls.flatMap((b) => b.getAnimations())
-      if (allAnims.length === 0) return
+    // prepare each bubble with a random looping animation (Web Animations API)
+    bubbleEls.forEach((bubble, i) => {
+      // start invisible
+      bubble.style.opacity = '0'
+      bubble.style.transition = 'opacity 600ms ease'
 
-      if (speedupRafRef.current) {
-        window.cancelAnimationFrame(speedupRafRef.current)
-        speedupRafRef.current = null
-      }
+      // randomized motion vector and duration
+      const dx = (Math.random() - 0.5) * (80 + Math.random() * 220) // px
+      const dy = (Math.random() - 0.5) * (60 + Math.random() * 200) // px
+      const rotate = (Math.random() - 0.5) * 30 // degrees subtle rotation
+      const duration = Math.floor((1.8 + Math.random() * 2.5) * 1000) // 1800 - 4300ms
 
-      const targetRate = 2.6
-      const decayMs = 900
+      const keyframes = [
+        { transform: `translate(0px, 0px) rotate(0deg)` },
+        { transform: `translate(${dx / 2}px, ${dy / 2}px) rotate(${rotate / 2}deg)` },
+        { transform: `translate(${dx}px, ${dy}px) rotate(${rotate}deg)` },
+      ]
 
-  allAnims.forEach((a) => { try { a.playbackRate = targetRate } catch { void 0 } })
+      // create animation but keep it paused until shown
+      const a = (bubble as any).animate(keyframes, {
+        duration,
+        iterations: Infinity,
+        direction: 'alternate',
+        easing: 'ease-in-out',
+        delay: Math.floor(Math.random() * 800),
+      }) as Animation
 
-      const start = performance.now()
-      const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+      a.pause()
+      anims.push(a)
 
-      const step = (now: number) => {
-        const t = Math.min(1, (now - start) / decayMs)
-        const eased = easeOutCubic(t)
-        const currentRate = targetRate + (1 - targetRate) * eased
-  allAnims.forEach((a) => { try { a.playbackRate = currentRate } catch { void 0 } })
+      window.setTimeout(() => {
+        bubble.style.opacity = '1'
+      }, i * 60)
+    })
 
-        if (t < 1) {
-          speedupRafRef.current = window.requestAnimationFrame(step)
-        } else {
-          speedupRafRef.current = null
-          allAnims.forEach((a) => { try { a.playbackRate = 1 } catch { void 0 } })
+    // handlers to show/hide bubbles
+    const show = () => {
+      el.style.transition = 'opacity 700ms ease'
+      el.style.opacity = '1'
+      el.style.pointerEvents = 'auto'
+      anims.forEach((a, idx) => {
+        try {
+          // small stagger for play
+          window.setTimeout(() => a.play(), idx * 40)
+        } catch {
+          void 0
         }
-      }
-
-      speedupRafRef.current = window.requestAnimationFrame(step)
+      })
     }
 
-    window.addEventListener('bubble-speedup', handler)
-    return () => window.removeEventListener('bubble-speedup', handler)
+    const hide = () => {
+      el.style.transition = 'opacity 300ms ease'
+      el.style.opacity = '0'
+      el.style.pointerEvents = 'none'
+      anims.forEach((a) => {
+        try {
+          a.pause()
+        } catch {
+          void 0
+        }
+      })
+      // fade each bubble out quickly
+      bubbleEls.forEach((b, i) => {
+        window.setTimeout(() => {
+          b.style.transition = 'opacity 300ms ease, transform 300ms ease'
+          b.style.opacity = '0'
+        }, i * 10)
+      })
+    }
+
+    // start visible with animations playing
+    el.style.opacity = '1'
+    el.style.pointerEvents = 'auto'
+    anims.forEach((a, idx) => window.setTimeout(() => a.play(), idx * 30))
+
+    window.addEventListener('bubbles-show', show)
+    window.addEventListener('bubbles-hide', hide)
+
+    return () => {
+      anims.forEach((a) => {
+        try {
+          a.cancel()
+        } catch {
+          void 0
+        }
+      })
+      window.removeEventListener('bubbles-show', show)
+      window.removeEventListener('bubbles-hide', hide)
+    }
   }, [])
 
   return (
@@ -90,13 +141,19 @@ export default function BackgroundBubbles() {
         {bubbles.map((b, i) => {
           const width = typeof b.style.width === 'number' ? `${b.style.width}px` : b.style.width
           const height = typeof b.style.height === 'number' ? `${b.style.height}px` : b.style.height
-          const style: CSSProperties = { ...(b.style as CSSProperties), width, height }
+          const style: CSSProperties = { ...(b.style as CSSProperties), width, height, transition: 'transform 0.3s ease' }
 
           return (
             <div
               key={i}
               className={`bubble ${b.speed} ${b.delay}`}
               style={style}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'scale(1.2)'
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.transform = 'scale(1)'
+              }}
             />
           )
         })}

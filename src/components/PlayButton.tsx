@@ -1,8 +1,9 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 export default function PlayButton({ onClick }: { onClick?: () => void }) {
   // Botón central: activa burbujas y audio
   const wrapperRef = useRef<HTMLButtonElement | null>(null)
+  const [active, setActive] = useState(false)
 
   const handleClick = useCallback((e: React.MouseEvent) => {
     const btn = wrapperRef.current
@@ -43,19 +44,38 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
       window.dispatchEvent(ev2)
     }
 
-    document.body.style.backgroundColor = 'black'
+    // Toggle background: if activating, set black and hide bubbles; if deactivating, show bubbles
+    if (!active) {
+      document.body.style.backgroundColor = 'black'
+      window.dispatchEvent(new CustomEvent('bubbles-hide'))
+      // emit reel shockwave
+      window.dispatchEvent(new CustomEvent('reel-shock', { detail: { source: 'play-button' } }))
+    } else {
+      document.body.style.backgroundColor = ''
+      window.dispatchEvent(new CustomEvent('bubbles-show'))
+    }
+    setActive(!active)
 
     if (onClick) onClick()
-  }, [onClick])
+  }, [onClick, active])
 
   return (
     <div className="play-wrapper mt-200" aria-hidden="false">
       <button
         ref={wrapperRef}
-        className="play-button glow"
+        // removed gradient classes to force solid color
+        className="play-button"
         onClick={handleClick}
         aria-label="Toca para jugar"
         type="button"
+        style={{
+          background: '#dc2626', // red-600
+          color: '#ffffff',
+          border: '2px solid #b91c1c', // darker red border
+          padding: '14px 22px',
+          borderRadius: '9999px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+        }}
       >
         <span className="label">Toca para jugar</span>
       </button>
