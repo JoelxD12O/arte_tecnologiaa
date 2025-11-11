@@ -21,7 +21,7 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
 
     window.setTimeout(() => ripple.remove(), 900)
 
-  const DURATION = 1200
+    const DURATION = 1200
 
     try {
       window.dispatchEvent(new CustomEvent('bubble-speedup', { detail: { source: 'play-button', duration: DURATION } }))
@@ -43,11 +43,13 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
       window.dispatchEvent(ev2)
     }
 
+    document.body.style.backgroundColor = 'black'
+
     if (onClick) onClick()
   }, [onClick])
 
   return (
-    <div className="play-wrapper" aria-hidden="false">
+    <div className="play-wrapper mt-200" aria-hidden="false">
       <button
         ref={wrapperRef}
         className="play-button glow"
