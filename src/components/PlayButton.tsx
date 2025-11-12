@@ -50,9 +50,13 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
       window.dispatchEvent(new CustomEvent('bubbles-hide'))
       // emit reel shockwave
       window.dispatchEvent(new CustomEvent('reel-shock', { detail: { source: 'play-button' } }))
+      // tell reels to play
+      window.dispatchEvent(new CustomEvent('reel-play'))
     } else {
       document.body.style.backgroundColor = ''
       window.dispatchEvent(new CustomEvent('bubbles-show'))
+      // tell reels to stop
+      window.dispatchEvent(new CustomEvent('reel-stop'))
     }
     setActive(!active)
 
