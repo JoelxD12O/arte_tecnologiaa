@@ -64,7 +64,7 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
   }, [onClick, active])
 
   return (
-    <div className="play-wrapper mt-200" aria-hidden="false">
+    <div className="play-wrapper" aria-hidden="false" style={{ zIndex: 9999, position: 'relative' }}>
       <button
         ref={wrapperRef}
         // removed gradient classes to force solid color
@@ -73,12 +73,15 @@ export default function PlayButton({ onClick }: { onClick?: () => void }) {
         aria-label="Toca para jugar"
         type="button"
         style={{
-          background: '#dc2626', // red-600
+          background: 'rgba(220, 38, 38, 0.6)', // More transparent red
           color: '#ffffff',
-          border: '2px solid #b91c1c', // darker red border
+          border: '2px solid rgba(185, 28, 28, 0.5)', // More transparent border
           padding: '14px 22px',
           borderRadius: '9999px',
           boxShadow: '0 10px 30px rgba(0,0,0,0.45)',
+          backdropFilter: 'blur(4px)',
+          animation: 'pulse-attention 2s infinite',
+          cursor: 'pointer',
         }}
       >
         <span className="label">Toca para jugar</span>

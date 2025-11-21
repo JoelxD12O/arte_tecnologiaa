@@ -1,28 +1,17 @@
-import './App.css';
-import { useState } from 'react';
-import BackgroundBubbles from './components/BackgroundBubbles';
-import AudioControl from './components/AudioControl';
-import ReelComponent from './components/ReelComponent';
-import PlayButton from './components/PlayButton';
+import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import HomePage from './components/HomePage'
+import CameraComponent from './components/CameraComponent'
 
 function App() {
-  const [isBlackBackground, setIsBlackBackground] = useState(false);
-
   return (
-    <div className={`min-h-screen ${isBlackBackground ? 'bg-black' : 'bg-transparent'}`}>
-      {!isBlackBackground && <BackgroundBubbles />}
-      <AudioControl />
-      <div className="relative top-10">
-          <ReelComponent />
-      </div>
-
-
-      <div className="mt-[250px] text-center">
-        <PlayButton onClick={() => setIsBlackBackground(!isBlackBackground)} />
-      </div>
-          
-    </div>
-  );
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/camera" element={<CameraComponent />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
-export default App;
+export default App
