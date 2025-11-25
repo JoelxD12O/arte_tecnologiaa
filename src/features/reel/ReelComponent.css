@@ -130,3 +130,9 @@
   90% { transform: translate(10%,5%) }
   100% { transform: translate(5%,0) }
 }
+
+/* Animación de brillo shimmer para el botón */
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(200%) rotate(45deg); }
+}

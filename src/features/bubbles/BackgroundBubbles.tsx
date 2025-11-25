@@ -3,13 +3,15 @@
 import { useEffect, useState } from 'react'
 
 const FRASES = [
-  "El tiempo vuela...", "¿Qué hora es?", "Sigue bajando", "Dopamina",
-  "Cerebro frito", "No pares", "¿Te diviertes?", "Tic Tac", 
-  "CONSUMIR", "Vacio", "Error", "404", "Cual fue tu ultimo reel?", 
-  "¿Uno más?", "Scroll infinito", "Batería baja", "Qué es lo ultimo que viste?"
+  "SIGUE", "CONSUMIR", "MÁS", "NO PARES", "UNO MÁS",
+  "Cerebro vacío", "Dopamina", "SCROLL", "Más contenido",
+  "No pienses", "SIGUE BAJANDO", "Vacío", "Sin sentido",
+  "¿Qué haces?", "Perdido", "CONSUMIR MÁS", "Sigue...",
+  "Otro más", "VACÍO", "Sin parar", "Más y más", "SIGUE",
+  "Zombi digital", "Cerebro OFF", "CONSUMIR", "MÁS MÁS MÁS"
 ]
 
-const EMOJIS = ["👁️", "🧠", "💊", "🤡", "💀", "📱", "📉", "💉", "📺", "🧟"]
+const EMOJIS = ["👁️", "🧠", "💀", "🧟", "😵", "😵‍💫", "👻", "💉", "🔴", "⚠️", "❌"]
 
 interface FloatingItem {
   id: number
@@ -27,53 +29,59 @@ export default function BackgroundBubbles({ chaosLevel = 0 }: { chaosLevel?: num
   const [items, setItems] = useState<FloatingItem[]>([])
 
   useEffect(() => {
-    // Más caos = Más elementos (hasta un límite razonable)
-    const count = 15 + (chaosLevel * 4);
-    
+    // Más caos = Más elementos (hasta saturar la pantalla)
+    const count = 20 + (chaosLevel * 6); // Más elementos
+
     const newItems = Array.from({ length: count }).map((_, i) => ({
       id: i,
-      text: Math.random() > 0.4 
-        ? FRASES[Math.floor(Math.random() * FRASES.length)] 
+      text: Math.random() > 0.3
+        ? FRASES[Math.floor(Math.random() * FRASES.length)]
         : EMOJIS[Math.floor(Math.random() * EMOJIS.length)],
-      left: Math.random() * 95, 
-      top: Math.random() * 95, 
-      size: Math.random() * (1.5 + chaosLevel * 0.1) + 1, 
-      
+      left: Math.random() * 95,
+      top: Math.random() * 95,
+      size: Math.random() * (1.5 + chaosLevel * 0.1) + 1,
+
       // --- AQUÍ ESTÁ EL CAMBIO DE VELOCIDAD ---
       // Antes: 20-40s (Lento) -> Ahora: 3-8s (Rápido)
       // Restamos el chaosLevel para que se vuelvan frenéticos al final
-      duration: Math.max(2, (Math.random() * 6 + 4) - (chaosLevel * 0.3)), 
-      
-      delay: Math.random() * -10, 
+      duration: Math.max(2, (Math.random() * 6 + 4) - (chaosLevel * 0.3)),
+
+      delay: Math.random() * -10,
       isEmoji: Math.random() <= 0.4,
       animType: Math.floor(Math.random() * 5) // 5 tipos de movimiento
     }))
     setItems(newItems)
-  }, [chaosLevel]) 
+  }, [chaosLevel])
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
       {items.map((item) => (
         <div
           key={item.id}
-          className={`absolute whitespace-nowrap font-bold select-none opacity-60
-            ${item.isEmoji ? 'filter drop-shadow-md' : 'font-mono tracking-tighter text-black/80'}
+          className={`absolute whitespace-nowrap font-bold select-none
+            ${item.isEmoji ? 'filter drop-shadow-md' : 'font-mono tracking-tighter uppercase'}
+            ${chaosLevel > 12 ? 'animate-pulse' : ''}
           `}
           style={{
             left: `${item.left}%`,
             top: `${item.top}%`,
             fontSize: `${item.size}rem`,
-            // Animación infinita y alterna (ida y vuelta)
             animation: `float-${item.animType} ${item.duration}s infinite alternate ease-in-out`,
-            // Si hay mucho caos, algunas letras se ponen rojas
-            color: chaosLevel > 8 && !item.isEmoji ? '#cc0000' : undefined
+            // Progresión de colores según caos: negro -> rojo -> rojo brillante
+            color: item.isEmoji ? undefined :
+              chaosLevel > 15 ? '#ff0000' :
+              chaosLevel > 10 ? '#cc0000' :
+              chaosLevel > 5 ? '#990000' : '#000000',
+            opacity: chaosLevel > 10 ? 0.9 : 0.6,
+            textShadow: chaosLevel > 12 ? '0 0 10px rgba(255,0,0,0.8)' : 'none',
+            fontWeight: chaosLevel > 10 ? 900 : 700
           }}
         >
           {item.text}
         </div>
       ))}
-      
-      {/* DEFINIMOS RUTAS DE MOVIMIENTO "LIBRES" 
+
+      {/* DEFINIMOS RUTAS DE MOVIMIENTO "LIBRES"
          (Arriba, Abajo, Izquierda, Derecha, Diagonales)
          Aumenté los píxeles (px) para que se muevan más distancia.
       */}
