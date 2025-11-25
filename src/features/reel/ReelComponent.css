@@ -1,0 +1,132 @@
+/* ReelComponent.css */
+
+.reel-glitch {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1100;
+}
+
+.reel-glitch .glitch-layer {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  opacity: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.reel-glitch .glitch-layer.red {
+  filter: drop-shadow(0 0 8px rgba(255, 60, 60, 0.9));
+}
+
+.reel-glitch .glitch-layer.green {
+  filter: drop-shadow(0 0 8px rgba(60, 255, 120, 0.85));
+}
+
+.reel-glitch .glitch-layer.blue {
+  filter: drop-shadow(0 0 8px rgba(100, 160, 255, 0.9));
+}
+
+@keyframes glitch-clip {
+  0% { clip-path: inset(0% 0 90% 0); transform: translateX(0); }
+  10% { clip-path: inset(60% 0 10% 0); transform: translateX(-6px) skewX(-2deg); }
+  20% { clip-path: inset(10% 0 60% 0); transform: translateX(8px) skewX(2deg); }
+  30% { clip-path: inset(30% 0 40% 0); transform: translateX(-4px) skewX(-1deg); }
+  40% { clip-path: inset(5% 0 80% 0); transform: translateX(6px); }
+  50% { clip-path: inset(40% 0 40% 0); transform: translateX(-8px); }
+  60% { clip-path: inset(20% 0 60% 0); transform: translateX(6px) skewX(1deg); }
+  70% { clip-path: inset(60% 0 10% 0); transform: translateX(-3px); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translateX(4px); }
+  90% { clip-path: inset(30% 0 30% 0); transform: translateX(-2px); }
+  100% { clip-path: inset(0% 0 90% 0); transform: translateX(0); }
+}
+
+@keyframes glitch-flicker {
+  0% { opacity: 0; }
+  5% { opacity: 0.85; }
+  10% { opacity: 0; }
+  12% { opacity: 0.9; }
+  18% { opacity: 0; }
+  25% { opacity: 0.7; }
+  35% { opacity: 0; }
+  50% { opacity: 0.8; }
+  70% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.glitch-active .reel-glitch .glitch-layer {
+  opacity: 0.9;
+  animation: glitch-flicker 1.6s linear infinite;
+}
+
+.glitch-active .reel-glitch .red {
+  animation: glitch-clip 1.1s steps(6, end) infinite, glitch-flicker 1.6s linear infinite;
+  transform: translateX(-6px);
+}
+
+.glitch-active .reel-glitch .green {
+  animation: glitch-clip 1.3s steps(8, end) infinite, glitch-flicker 1.5s linear infinite;
+  transform: translateX(4px);
+}
+
+.glitch-active .reel-glitch .blue {
+  animation: glitch-clip 0.9s steps(5, end) infinite, glitch-flicker 1.2s linear infinite;
+  transform: translateX(10px);
+}
+
+.glitch-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(0,0,0,0.02) 50%, rgba(255,255,255,0.01) 50%);
+  background-size: 100% 3px;
+  mix-blend-mode: overlay;
+  z-index: 1110;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.glitch-active {
+  box-shadow: 0 0 40px rgba(255,120,60,0.08), 0 0 8px rgba(255,180,80,0.06) inset;
+}
+
+/* Brainrot static effect */
+.brainrot-static {
+  background-color: #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.brainrot-static::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  width: 200%;
+  height: 200vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.4'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  animation: bg-animation .2s infinite;
+  opacity: 0.35;
+  visibility: visible;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+@keyframes bg-animation {
+  0% { transform: translate(0,0) }
+  10% { transform: translate(-5%,-5%) }
+  20% { transform: translate(-10%,5%) }
+  30% { transform: translate(5%,-10%) }
+  40% { transform: translate(-5%,15%) }
+  50% { transform: translate(-10%,5%) }
+  60% { transform: translate(15%,0) }
+  70% { transform: translate(0,10%) }
+  80% { transform: translate(-15%,0) }
+  90% { transform: translate(10%,5%) }
+  100% { transform: translate(5%,0) }
+}

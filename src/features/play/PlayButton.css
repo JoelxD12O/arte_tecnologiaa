@@ -1,0 +1,65 @@
+.play-button {
+  --size: 180px;
+  pointer-events: auto;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.6px;
+  border: none;
+  outline: none;
+  box-shadow: 0 12px 30px rgba(3, 15, 26, 0.25), 0 6px 12px rgba(0, 0, 0, 0.08) inset;
+  background: linear-gradient(135deg, #ff6be0, #ffb84d);
+  transition: transform 220ms cubic-bezier(0.2, 0.9, 0.2, 1), box-shadow 220ms ease, filter 220ms ease;
+  transform: translateY(0) scale(1);
+  position: relative;
+  color: #072126;
+  background-color: rgba(220, 38, 38, 0.6);
+  border: 2px solid rgba(185, 28, 28, 0.5);
+  padding: 14px 22px;
+  backdrop-filter: blur(4px);
+  animation: pulse-attention 2s infinite;
+  cursor: pointer;
+}
+
+.label {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(6px);
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 999px;
+  transform: scale(0);
+  animation: rippleAnim 700ms ease-out forwards;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+@keyframes rippleAnim {
+  to {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-attention {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 15px rgba(220, 38, 38, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}

@@ -1,156 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
-/* Background bubbles styles */
-.bubbles-container {
-	position: absolute;
-	inset: 0; /* full-bleed */
-	pointer-events: none; /* allow clicks through */
+:root {
+  font-family: 'Fredoka', sans-serif;
+  color-scheme: light; 
+  /* 100% = Neón (Inicio), 0% = Gris (Final) */
+  --bg-saturation: 100%;
 }
 
-.bubble {
-	position: absolute;
-	border-radius: 9999px;
-	will-change: transform, opacity;
-	mix-blend-mode: normal;
-	opacity: 0.95;
-	filter: blur(0.2px);
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  
+  /* Fondo degradado semi-transparente para ver la cámara detrás */
+  background: linear-gradient(
+    -45deg, 
+    hsla(178, var(--bg-saturation), 47%, 0.85),
+    hsla(341, var(--bg-saturation), 50%, 0.85),
+    hsla(60, var(--bg-saturation), 50%, 0.85),
+    hsla(178, var(--bg-saturation), 47%, 0.85)
+  );
+  
+  background-size: 400% 400%;
+  animation: gradient-spin 15s ease infinite;
+  min-height: 100vh;
+  
+  transition: background 0.5s ease; 
+  cursor: auto;
 }
 
-/* Subtle floating keyframes with X/Y offsets and scale */
-@keyframes bubbleFloat {
-	0% {
-		transform: translate3d(0, 0, 0) scale(1);
-		opacity: 0.95;
-	}
-	25% {
-		transform: translate3d(-10px, 8px, 0) scale(0.98);
-		opacity: 0.9;
-	}
-	50% {
-		transform: translate3d(6px, -10px, 0) scale(1.02);
-		opacity: 0.95;
-	}
-	75% {
-		transform: translate3d(-6px, 12px, 0) scale(0.99);
-		opacity: 0.92;
-	}
-	100% {
-		transform: translate3d(0, 0, 0) scale(1);
-		opacity: 0.95;
-	}
+@keyframes gradient-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* Different speeds and easing so animations feel organic */
-.animate-bubble-slow { animation: bubbleFloat 14s ease-in-out infinite; }
-.animate-bubble-med  { animation: bubbleFloat 10s ease-in-out infinite; }
-.animate-bubble-fast { animation: bubbleFloat 7.5s ease-in-out infinite; }
-
-/* helper to vary starting phase */
-.delay-0  { animation-delay: 0s; }
-.delay-1  { animation-delay: 2.3s; }
-.delay-2  { animation-delay: 4.5s; }
-.delay-3  { animation-delay: 6.1s; }
-.delay-4  { animation-delay: 3.7s; }
-
-/* Responsive scaling for very small screens */
-@media (max-width: 420px) {
-	.bubble { transform-origin: center; }
+/* CAPA DE RUIDO (NOISE TEXTURE) - MEJORADA */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  /* Patrón de ruido SVG generado inline para no depender de archivos externos */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+  
+  background-size: 150px 150px;
+  opacity: 0.08; /* Sutil pero visible */
+  pointer-events: none;
+  z-index: 99999;
+  mix-blend-mode: overlay;
 }
 
-/* Temporary speed-up state when user presses play */
-.speedup .animate-bubble-slow  { animation-duration: 3s !important; }
-.speedup .animate-bubble-med   { animation-duration: 2s !important; }
-.speedup .animate-bubble-fast  { animation-duration: 1s !important; }
-.speedup .bubble {
-	/* make motion feel stronger */
-	filter: brightness(1.05) saturate(1.05);
+@layer components {
+  .btn-pop {
+    border: 4px solid black;
+    box-shadow: 6px 6px 0px 0px black;
+    transition: all 0.1s ease-out;
+  }
+  .btn-pop:active {
+    transform: translate(2px, 2px);
+    box-shadow: 4px 4px 0px 0px black;
+  }
+  .card-pop {
+    background-color: white;
+    border: 4px solid black;
+    border-radius: 1rem;
+    box-shadow: 8px 8px 0px 0px rgba(0,0,0,0.8);
+  }
 }
-
-/* Global class fallback to guarantee immediate sync when PlayButton toggles */
-.bubble-speedup-global .animate-bubble-slow  { animation-duration: 1.25s !important; }
-.bubble-speedup-global .animate-bubble-med   { animation-duration: 0.9s !important; }
-.bubble-speedup-global .animate-bubble-fast  { animation-duration: 0.6s !important; }
-.bubble-speedup-global .bubble { filter: brightness(1.08) saturate(1.08); }
-
-
-/* Play button styles */
-.play-wrapper {
-	position: absolute;
-	inset: 0; /* fill parent */
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	pointer-events: none; /* allow button to decide pointer-events */
-}
-
-.play-button {
-	--size: 180px;
-	pointer-events: auto;
-	width: var(--size);
-	height: var(--size);
-	border-radius: 9999px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	color: #072126;
-	font-weight: 800;
-	font-size: 1.05rem;
-	letter-spacing: 0.6px;
-	cursor: pointer;
-	user-select: none;
-	border: none;
-	outline: none;
-	box-shadow: 0 12px 30px rgba(3,15,26,0.25), 0 6px 12px rgba(0,0,0,0.08) inset;
-	background: linear-gradient(135deg,#ff6be0,#ffb84d);
-	transition: transform 220ms cubic-bezier(.2,.9,.2,1), box-shadow 220ms ease, filter 220ms ease;
-	transform: translateY(0) scale(1);
-	position: relative;
-}
-
-.play-button:hover {
-	transform: translateY(-6px) scale(1.03);
-	box-shadow: 0 20px 40px rgba(3,15,26,0.34);
-}
-
-.play-button:active {
-	transform: translateY(0) scale(0.98);
-}
-
-/* subtle pulsing glow */
-@keyframes playPulse {
-	0% { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0)); }
-	50% { filter: drop-shadow(0 0 18px rgba(255,140,120,0.12)); }
-	100% { filter: drop-shadow(0 0 0px rgba(255,255,255,0.0)); }
-}
-.play-button.glow {
-	animation: playPulse 3s ease-in-out infinite;
-}
-
-/* inner label style */
-.play-button .label {
-	padding: 8px 14px;
-	border-radius: 999px;
-	background: rgba(255,255,255,0.12);
-	backdrop-filter: blur(6px);
-}
-
-/* ripple */
-.ripple {
-	position: absolute;
-	border-radius: 999px;
-	transform: scale(0);
-	animation: rippleAnim 700ms ease-out forwards;
-	background: rgba(255,255,255,0.35);
-	pointer-events: none;
-}
-
-@keyframes rippleAnim {
-	to { transform: scale(3); opacity: 0; }
-}
-
-/* Responsive: smaller button on small screens */
-@media (max-width: 480px) {
-	.play-button { --size: 140px; font-size: 0.95rem; }
-}
-
-

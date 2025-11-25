@@ -1,17 +1,19 @@
-import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import HomePage from './components/HomePage'
-import CameraComponent from './components/CameraComponent'
+// src/App.tsx
 
-function App() {
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import HomePage from './pages/HomePage'
+import CameraComponent from './features/camera/CameraComponent'
+
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/camera" element={<CameraComponent />} />
+        
+        {/* CORRECCIÓN AQUÍ: */}
+        {/* Le pasamos chaosLevel={0} para que la cámara se vea limpia por defecto */}
+        <Route path="/camera" element={<CameraComponent chaosLevel={0} />} />
       </Routes>
     </BrowserRouter>
   )
 }
-
-export default App
