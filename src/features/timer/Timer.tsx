@@ -3,7 +3,17 @@ import { useState, useEffect } from 'react'
 export default function Timer({ chaosLevel = 0 }: { chaosLevel?: number }) {
   const [seconds, setSeconds] = useState(0)
 
+  // Reiniciar el contador cuando el caos vuelva a 0
   useEffect(() => {
+    if (chaosLevel === 0) {
+      setSeconds(0)
+    }
+  }, [chaosLevel])
+
+  useEffect(() => {
+    // Solo correr el timer si el caos es mayor a 0
+    if (chaosLevel === 0) return;
+
     // FÓRMULA DE ACELERACIÓN DEL TIEMPO:
     // Nivel 0: 1000ms (Normal)
     // Nivel 10: 100ms (10x más rápido)

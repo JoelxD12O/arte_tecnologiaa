@@ -5,9 +5,11 @@ import { useReelPlayback } from './useReelPlayback'
 interface ReelComponentProps {
   isActive: boolean;
   onChaos?: () => void;
+  autoClickNext?: boolean;
+  onAutoClickComplete?: () => void;
 }
 
-const ReelComponent: React.FC<ReelComponentProps> = ({ isActive, onChaos }) => {
+const ReelComponent: React.FC<ReelComponentProps> = ({ isActive, onChaos, autoClickNext, onAutoClickComplete }) => {
   const reelRef = useRef<HTMLDivElement>(null)
   const { videos, addNextVideo, clearVideos } = useReelPlayback()
 
@@ -102,12 +104,43 @@ const ReelComponent: React.FC<ReelComponentProps> = ({ isActive, onChaos }) => {
   }, [videos]);
 
 
-  const handleManualNext = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleManualNext = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     addNextVideo();
     setTotalConsumed(prev => prev + 1);
     if (onChaos) onChaos();
   }
+
+  // Auto-click repetido cada 1 segundo mientras la cámara tiembla
+  useEffect(() => {
+    console.log('🔍 Auto-click effect triggered:', { autoClickNext, isActive, videosLength: videos.length });
+    
+    if (autoClickNext && isActive && videos.length > 0) {
+      console.log('🎬 Starting auto-click interval (every 1 second)');
+      
+      // Primer click inmediato
+      addNextVideo();
+      setTotalConsumed(prev => prev + 1);
+      if (onChaos) onChaos();
+      
+      // Luego clicks cada 1 segundo
+      const interval = setInterval(() => {
+        console.log('✅ Auto-clicking next reel!');
+        addNextVideo();
+        setTotalConsumed(prev => prev + 1);
+        if (onChaos) onChaos();
+      }, 1000)
+      
+      return () => {
+        console.log('🛑 Stopping auto-click interval');
+        clearInterval(interval)
+        if (onAutoClickComplete) onAutoClickComplete();
+      }
+    } else {
+      console.log('❌ Auto-click conditions not met');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoClickNext, isActive, videos.length])
 
   const onEnd = (id: string) => {
     const v = videos.find(v => v.id === id)

@@ -1,11 +1,14 @@
+import { useEffect, useRef } from 'react'
 import { useCameraStream } from './useCameraStream'
 
 interface CameraProps {
-  chaosLevel: number; 
+  chaosLevel: number;
+  onGlitchStart?: () => void;
 }
 
-export default function CameraComponent({ chaosLevel = 0 }: CameraProps) {
+export default function CameraComponent({ chaosLevel = 0, onGlitchStart }: CameraProps) {
   const { available, error } = useCameraStream('camera-video')
+  const glitchTriggeredRef = useRef(false)
 
   // Filtros de desgaste
   const grayScale = Math.min(100, chaosLevel * 8); 
@@ -14,6 +17,20 @@ export default function CameraComponent({ chaosLevel = 0 }: CameraProps) {
 
   // Lógica de Glitch/Temblor: Se activa si el caos es alto
   const isGlitching = chaosLevel > 15;
+
+  // Detectar cuando empieza a temblar (SOLO en la página principal)
+  useEffect(() => {
+    if (isGlitching && onGlitchStart && !glitchTriggeredRef.current) {
+      console.log('📹 HomePage camera is glitching! Starting auto-click mode');
+      glitchTriggeredRef.current = true;
+      onGlitchStart();
+    }
+    // Reset cuando deja de temblar (para que pueda volver a activarse en el futuro)
+    if (!isGlitching && glitchTriggeredRef.current) {
+      console.log('📹 HomePage camera stopped glitching');
+      glitchTriggeredRef.current = false;
+    }
+  }, [isGlitching, onGlitchStart]);
 
   return (
     <div

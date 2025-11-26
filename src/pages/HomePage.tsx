@@ -7,14 +7,21 @@ import ReelComponent from '../features/reel/ReelComponent'
 import Timer from '../features/timer/Timer'
 import BackgroundBubbles from '../features/bubbles/BackgroundBubbles'
 import CameraComponent from '../features/camera/CameraComponent'
+import { useChaosSync } from '../features/shared/useChaosSync'
 
 export default function HomePage() {
-  const [isDopamineMode, setIsDopamineMode] = useState(false)
-  const [chaosLevel, setChaosLevel] = useState(0)
-  // Estado para el mensaje de reflexión
+  const [isDopamineMode, setIsDopamineMode] = useState(() => {
+    const saved = localStorage.getItem('dopamine_mode')
+    return saved === 'true'
+  })
+  const { chaosLevel, incrementChaos, resetChaos } = useChaosSync()
   const [showReflection, setShowReflection] = useState(false)
+  const [autoClickNext, setAutoClickNext] = useState(false)
 
-  // Lógica de degradación de color y oscurecimiento siniestro
+  useEffect(() => {
+    console.log('📊 autoClickNext state changed:', autoClickNext);
+  }, [autoClickNext])
+
   useEffect(() => {
     const saturation = Math.max(0, 100 - (chaosLevel * 8));
     const brightness = Math.max(30, 100 - (chaosLevel * 4)); // Oscurece progresivamente
@@ -26,10 +33,22 @@ export default function HomePage() {
   }, [chaosLevel]);
 
   const handleChaosIncrease = () => {
-    setChaosLevel(prev => prev + 1)
+    incrementChaos()
   }
 
-  // Lógica al detener/iniciar
+  const handleCameraGlitchStart = () => {
+    console.log('🎯 HomePage camera glitch detected! Setting auto_next_reel flag');
+    setAutoClickNext(true)
+  }
+
+  useEffect(() => {
+    const isGlitching = chaosLevel > 15
+    if (!isGlitching && autoClickNext) {
+      console.log('⏹️ Chaos level dropped, stopping auto-click');
+      setAutoClickNext(false)
+    }
+  }, [chaosLevel, autoClickNext])
+
   const handleToggleMode = () => {
     const newMode = !isDopamineMode;
 
@@ -39,7 +58,11 @@ export default function HomePage() {
       // Ocultar el mensaje después de 4 segundos
       setTimeout(() => setShowReflection(false), 4000);
 
-      setChaosLevel(0);
+      resetChaos();
+      localStorage.removeItem('dopamine_mode');
+    } else {
+      // AL INICIAR: Guardar el estado
+      localStorage.setItem('dopamine_mode', 'true');
     }
 
     setIsDopamineMode(newMode);
@@ -86,7 +109,10 @@ export default function HomePage() {
           filter: `brightness(var(--bg-brightness, 100%))`,
         }}
       >
-        <CameraComponent chaosLevel={chaosLevel} />
+        <CameraComponent 
+          chaosLevel={chaosLevel} 
+          onGlitchStart={handleCameraGlitchStart}
+        />
         <BackgroundBubbles chaosLevel={chaosLevel} />
       </div>
 
@@ -132,6 +158,8 @@ export default function HomePage() {
             <ReelComponent
                 isActive={isDopamineMode}
                 onChaos={handleChaosIncrease}
+                autoClickNext={autoClickNext}
+                onAutoClickComplete={() => setAutoClickNext(false)}
             />
           </div>
         </div>
