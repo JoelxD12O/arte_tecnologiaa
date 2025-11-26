@@ -6,7 +6,7 @@ const CHAOS_TIMESTAMP_KEY = 'app_chaos_timestamp'
 export function useChaosSync() {
   const [chaosLevel, setChaosLevel] = useState(0)
 
-  // Leer el nivel de caos del localStorage al iniciar
+  // Cargar el estado inicial
   useEffect(() => {
     const storedChaos = localStorage.getItem(CHAOS_KEY)
     const storedTimestamp = localStorage.getItem(CHAOS_TIMESTAMP_KEY)
@@ -17,22 +17,25 @@ export function useChaosSync() {
       const now = Date.now()
       const elapsed = Math.floor((now - savedTime) / 1000) // segundos transcurridos
       
-      // Si han pasado menos de 60 segundos, recuperar el estado
       if (elapsed < 60) {
         setChaosLevel(savedChaos)
       } else {
-        // Si pasó mucho tiempo, reiniciar
         localStorage.removeItem(CHAOS_KEY)
         localStorage.removeItem(CHAOS_TIMESTAMP_KEY)
       }
     }
   }, [])
 
-  // Escuchar cambios en el localStorage (sincronización entre páginas)
+  // Escuchar cambios en localStorage (solo funciona entre pestañas diferentes)
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === CHAOS_KEY && e.newValue) {
-        setChaosLevel(parseInt(e.newValue))
+      if (e.key === CHAOS_KEY) {
+        if (e.newValue) {
+          setChaosLevel(parseInt(e.newValue))
+        } else {
+          // Si se eliminó la key, resetear a 0
+          setChaosLevel(0)
+        }
       }
     }
 
@@ -40,7 +43,24 @@ export function useChaosSync() {
     return () => window.removeEventListener('storage', handleStorageChange)
   }, [])
 
-  // Función para incrementar el caos
+  // Polling para detectar cambios en la misma pestaña
+  useEffect(() => {
+    const checkLocalStorage = () => {
+      const storedChaos = localStorage.getItem(CHAOS_KEY)
+      if (storedChaos) {
+        const newChaos = parseInt(storedChaos)
+        setChaosLevel(newChaos)
+      } else {
+        // Si no existe la key, es porque se reseteó
+        setChaosLevel(0)
+      }
+    }
+
+    // Verificar cada 500ms
+    const interval = setInterval(checkLocalStorage, 500)
+    return () => clearInterval(interval)
+  }, [])
+
   const incrementChaos = () => {
     setChaosLevel(prev => {
       const newLevel = prev + 1
@@ -50,7 +70,6 @@ export function useChaosSync() {
     })
   }
 
-  // Función para resetear el caos
   const resetChaos = () => {
     setChaosLevel(0)
     localStorage.removeItem(CHAOS_KEY)
